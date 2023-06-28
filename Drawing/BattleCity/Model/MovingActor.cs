@@ -1,4 +1,7 @@
+using BattleCity.references;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace BattleCity.Model;
@@ -73,10 +76,10 @@ public abstract class MovingGameObject : GameObject
         if (!_field.Tiles[loc.X, loc.Y].IsPassable)
             return false;
 
-        if (
-            _field.GameObjects.OfType<MovingGameObject>()
-            .Any(t => t != this && (t.CellLocation == loc || t.TargetCellLocation == loc)))
-            return false;
+        //if (
+        //    _field.GameObjects.OfType<MovingGameObject>()
+        //    .Any(t => t != this && (t.CellLocation == loc || t.TargetCellLocation == loc)))
+        //   return false;
 
         TargetCellLocation = loc;
         return true;
@@ -153,5 +156,44 @@ public abstract class MovingGameObject : GameObject
             if (pos.X / GameField.CellSize >= TargetCellLocation.X)
                 SetLocation(TargetCellLocation);
         }
+
+        var Player = GameReferences.FieldRef.Player;
+        var OtherObj = GameReferences.FieldRef.GameObjects.Where(x => x.GetType() != Player.GetType()).OfType<MovingGameObject>()
+            .Select(x => x as MovingGameObject)
+            .ToList();
+
+        if(GameReferences.Stopwatch.Elapsed.TotalSeconds >= 2)
+            this.IntersectObjects(Player, OtherObj);
+
+
+
+
     }
+
+    public bool IntersectObjects(Player player, List<MovingGameObject> objects)
+    {
+        
+        foreach (MovingGameObject obj in objects)
+        {
+            bool Check = false;
+            if (
+                 !(player.Location.X > obj.Location.X + 16) &&
+                 !(player.Location.X < obj.Location.X - 16) &&
+                 !(player.Location.Y > obj.Location.Y + 16) &&
+                 !(player.Location.Y < obj.Location.Y - 16) &&
+                 (obj.Facing == Facing.East || player.Facing != Facing.East)
+
+               )
+            Check = true;
+            
+            if (Check == true)
+            {
+                GameReferences.FieldRef.GameObjects.Remove(obj);
+                GameReferences.FieldRef.Player.SetLocation(new CellLocation(1000, 1000));
+            }
+
+        }
+        return false;
+    }
+
 }
