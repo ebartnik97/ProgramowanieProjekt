@@ -2,6 +2,9 @@ using Avalonia;
 using BattleCity.Model;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using BattleCity.references;
+using System.Diagnostics;
+using System.Reactive.Concurrency;
 
 namespace BattleCity;
 
@@ -20,6 +23,9 @@ public class App : Application
 
             var field = new GameField();
             var game = new Game(field);
+            GameReferences.FieldRef = field;
+            GameReferences.Stopwatch = new Stopwatch();
+            GameReferences.Stopwatch.Start();
             game.Start();
             mainWindow.DataContext = field;
 
